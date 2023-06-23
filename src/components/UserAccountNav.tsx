@@ -1,3 +1,5 @@
+"use client";
+
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -6,18 +8,22 @@ import { User } from "next-auth";
 import { FC } from "react";
 import UserAvatar from "./UserAvatar";
 
-interface UserAccountNavProps {
+interface UserAccountNavProps extends React.HTMLAttributes<HTMLDivElement> {
   user: Pick<User, "name" | "image" | "email">;
 }
 
-const UserAccountNav: FC<UserAccountNavProps> = ({ user }) => {
+export function UserAccountNav({ user }: UserAccountNavProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <UserAvatar user={user} />
+        <UserAvatar
+          className="h-8 w-8"
+          user={{
+            name: user.name || null,
+            image: user.image || null,
+          }}
+        />
       </DropdownMenuTrigger>
     </DropdownMenu>
   );
-};
-
-export default UserAccountNav;
+}
