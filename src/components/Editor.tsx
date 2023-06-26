@@ -5,7 +5,8 @@ import TextareaAutosize from "react-textarea-autosize";
 import { PostCreationRequest, PostValidator } from "@/lib/validators/post";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import EditorJS from "@editorjs/editorjs";
+import type EditorJS from "@editorjs/editorjs";
+import { uploadFiles } from "@/lib/uploadthing";
 interface EditorProps {
   subredditId: string;
 }
@@ -54,6 +55,28 @@ const Editor: FC<EditorProps> = ({ subredditId }) => {
               endpoint: "/api/link",
             },
           },
+          image: {
+            class: ImageTool,
+            config: {
+              uploader: {
+                async uploadByFile(file: File) {
+                  const [res] = await uploadFiles([file], "imageUploader");
+
+                  return {
+                    success: 1,
+                    file: {
+                      url: res.fileUrl,
+                    },
+                  };
+                },
+              },
+            },
+          },
+          list: List,
+          code: Code,
+          inlineCode: InlineCode,
+          table: Table,
+          embed: Embed,
         },
       });
     }
