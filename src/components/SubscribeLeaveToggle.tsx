@@ -102,8 +102,8 @@ const SubscribeLeaveToggle: FC<SubscribeLeaveToggleProps> = ({
     </Button>
   ) : (
     <Button
-      isLoading={isUnsubLoading}
-      onClick={() => unsubscribe()}
+      isLoading={isSubLoading}
+      onClick={() => subscribe()}
       className="w-full mt-1 mb-4"
     >
       Join to post
