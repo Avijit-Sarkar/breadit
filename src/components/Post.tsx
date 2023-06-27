@@ -3,6 +3,10 @@ import { Post, User, Vote } from "@prisma/client";
 import { MessageSquare } from "lucide-react";
 import { FC, useRef } from "react";
 import EditorOutput from "./EditorOutput";
+import Link from "next/link";
+import PostVoteClient from "./post-vote/PostVoteClient";
+
+type PartialVote = Pick<Vote, "type">;
 
 interface PostProps {
   subredditName: string;
@@ -11,25 +15,38 @@ interface PostProps {
     votes: Vote[];
   };
   commentAmt: number;
+  votesAmt: number;
+  currentVote?: PartialVote;
 }
 
-const Post: FC<PostProps> = ({ subredditName, post, commentAmt }) => {
+const Post: FC<PostProps> = ({
+  subredditName,
+  post,
+  commentAmt,
+  votesAmt,
+  currentVote,
+}) => {
   const pRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="rounded-md bg-white shadow">
       <div className="px-6 py-4 flex justify-between">
-        {/* TODO: PostVotes */}
+        <PostVoteClient
+          postId={post.id}
+          initialVote={currentVote?.type}
+          initialVotesAmt={votesAmt}
+        />
+
         <div className="w-0 flex-1">
           <div className="max-h-40 mt-1 text-xs text-gray-500">
             {subredditName ? (
               <>
-                <a
+                <Link
                   className="underline text-zinc-900 text-sm underline-offset-2"
                   href={`r/${subredditName}`}
                 >
                   r/{subredditName}
-                </a>
+                </Link>
 
                 <span className="px-1">•</span>
               </>
@@ -37,11 +54,11 @@ const Post: FC<PostProps> = ({ subredditName, post, commentAmt }) => {
             <span>Posted by u/{post.author.name}</span>{" "}
             {formatTimeToNow(new Date(post.createdAt))}
           </div>
-          <a href={`/r/${subredditName}/post/${post.id}`}>
+          <Link href={`/r/${subredditName}/post/${post.id}`}>
             <h1 className="text-lg font-semibold py-2 leading-6 text-gray-900">
               {post.title}
             </h1>
-          </a>
+          </Link>
 
           <div
             className="relative text-sm max-h-40 w-full overflow-clip"
@@ -57,12 +74,12 @@ const Post: FC<PostProps> = ({ subredditName, post, commentAmt }) => {
       </div>
 
       <div className="bg-gray-50 z-20 text-sm p-4 sm:px-6">
-        <a
+        <Link
           className="w-fit flex items-center gap-2"
           href={`/r/${subredditName}/post/${post.id}`}
         >
           <MessageSquare className="h-4 w-4" /> {commentAmt} comments
-        </a>
+        </Link>
       </div>
     </div>
   );
