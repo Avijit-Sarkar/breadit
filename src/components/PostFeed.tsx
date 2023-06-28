@@ -1,31 +1,31 @@
 "use client";
 
+import { INFINITE_SCROLLING_PAGINATION_RESULT } from "@/config";
 import { ExtendedPost } from "@/types/db";
-import { FC, useRef } from "react";
 import { useIntersection } from "@mantine/hooks";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { INFINITE_SCROLLING_PAGINATION_RESULT } from "@/config";
 import axios from "axios";
-import { useSession } from "next-auth/react";
+import { Loader2 } from "lucide-react";
+import { FC, useEffect, useRef } from "react";
 import Post from "./Post";
+import { useSession } from "next-auth/react";
 
 interface PostFeedProps {
-  initalPosts: ExtendedPost[];
+  initialPosts: ExtendedPost[];
   subredditName?: string;
 }
 
-const PostFeed: FC<PostFeedProps> = ({ initalPosts, subredditName }) => {
+const PostFeed: FC<PostFeedProps> = ({ initialPosts, subredditName }) => {
   const lastPostRef = useRef<HTMLElement>(null);
   const { ref, entry } = useIntersection({
     root: lastPostRef.current,
     threshold: 1,
   });
-
   const { data: session } = useSession();
 
   const { data, fetchNextPage, isFetchingNextPage } = useInfiniteQuery(
     ["infinite-query"],
-    async ({ pageParam }) => {
+    async ({ pageParam = 1 }) => {
       const query =
         `/api/posts?limit=${INFINITE_SCROLLING_PAGINATION_RESULT}&page=${pageParam}` +
         (!!subredditName ? `&subredditName=${subredditName}` : "");
@@ -33,15 +33,22 @@ const PostFeed: FC<PostFeedProps> = ({ initalPosts, subredditName }) => {
       const { data } = await axios.get(query);
       return data as ExtendedPost[];
     },
+
     {
       getNextPageParam: (_, pages) => {
         return pages.length + 1;
       },
-      initialData: { pages: [initalPosts], pageParams: [1] },
+      initialData: { pages: [initialPosts], pageParams: [1] },
     }
   );
 
-  const posts = data?.pages.flatMap((page) => page) ?? initalPosts;
+  useEffect(() => {
+    if (entry?.isIntersecting) {
+      fetchNextPage(); // Load more posts when the last post comes into view
+    }
+  }, [entry, fetchNextPage]);
+
+  const posts = data?.pages.flatMap((page) => page) ?? initialPosts;
 
   return (
     <ul className="flex flex-col col-span-2 space-y-6">
@@ -57,30 +64,37 @@ const PostFeed: FC<PostFeedProps> = ({ initalPosts, subredditName }) => {
         );
 
         if (index === posts.length - 1) {
+          // Add a ref to the last post in the list
           return (
             <li key={post.id} ref={ref}>
               <Post
-                currentVote={currentVote}
-                votesAmt={votesAmt}
-                commentAmt={post.comments.length}
                 post={post}
+                commentAmt={post.comments.length}
                 subredditName={post.subreddit.name}
+                votesAmt={votesAmt}
+                currentVote={currentVote}
               />
             </li>
           );
         } else {
           return (
             <Post
-              currentVote={currentVote}
-              votesAmt={votesAmt}
               key={post.id}
-              commentAmt={post.comments.length}
               post={post}
+              commentAmt={post.comments.length}
               subredditName={post.subreddit.name}
+              votesAmt={votesAmt}
+              currentVote={currentVote}
             />
           );
         }
       })}
+
+      {isFetchingNextPage && (
+        <li className="flex justify-center">
+          <Loader2 className="w-6 h-6 text-zinc-500 animate-spin" />
+        </li>
+      )}
     </ul>
   );
 };
