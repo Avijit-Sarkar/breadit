@@ -36,6 +36,8 @@ const PostComment: FC<PostCommentProps> = ({ comment }) => {
           </p>
         </div>
       </div>
+
+      <p className="text-sm text-zinc-900 mt-2">{comment.text}</p>
     </div>
   );
 };
