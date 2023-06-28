@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { FC, useEffect, useRef } from "react";
 import Post from "./Post";
 import { useSession } from "next-auth/react";
+import { Skeleton } from "./ui/skeleton";
 
 interface PostFeedProps {
   initialPosts: ExtendedPost[];
@@ -91,8 +92,9 @@ const PostFeed: FC<PostFeedProps> = ({ initialPosts, subredditName }) => {
       })}
 
       {isFetchingNextPage && (
-        <li className="flex justify-center">
-          <Loader2 className="w-6 h-6 text-zinc-500 animate-spin" />
+        <li className="space-y-4 justify-start">
+          <Skeleton className="w-[70%] h-[20px] rounded-full bg-slate-300" />
+          <Skeleton className="w-[50%] h-4 rounded-full bg-slate-300" />
         </li>
       )}
     </ul>
