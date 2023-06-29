@@ -102,8 +102,11 @@ const PostVoteClient = ({
       <Button
         onClick={() => vote("DOWN")}
         size="sm"
+        className={cn({
+          "text-emerald-500": currentVote === "DOWN",
+        })}
         variant="ghost"
-        aria-label="downvote"
+        aria-label="upvote"
       >
         <ArrowBigDown
           className={cn("h-5 w-5 text-zinc-700", {
