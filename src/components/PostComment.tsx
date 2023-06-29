@@ -13,7 +13,9 @@ import { Textarea } from "./ui/Textarea";
 import { Label } from "./ui/Label";
 import { useMutation } from "@tanstack/react-query";
 import { CommentRequest } from "@/lib/validators/comment";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import { useCustomToasts } from "@/hooks/use-custom-toast";
+import { toast } from "@/hooks/use-toast";
 
 type ExtendedComment = Comment & {
   votes: CommentVote[];
@@ -38,6 +40,7 @@ const PostComment: FC<PostCommentProps> = ({
   const { data: session } = useSession();
   const [isReplying, setIsReplying] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
+  const { loginToast } = useCustomToasts();
 
   const { mutate: PostComment, isLoading } = useMutation({
     mutationFn: async ({ postId, text, replyToId }: CommentRequest) => {
@@ -51,6 +54,24 @@ const PostComment: FC<PostCommentProps> = ({
         payload
       );
       return data;
+    },
+    onError: (err) => {
+      if (err instanceof AxiosError) {
+        if (err.response?.status === 401) {
+          return loginToast();
+        }
+      }
+
+      return toast({
+        title: "Something went wrong.",
+        description: "Your comment was not posted. Please try again.",
+        variant: "destructive",
+      });
+    },
+    onSuccess: () => {
+      router.refresh();
+      setInput("");
+      setIsReplying(false);
     },
   });
 
