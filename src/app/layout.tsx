@@ -27,7 +27,7 @@ export default function RootLayout({
       )}
     >
       <body
-        className="min-h-screen pt-12 bg-slate-50 antialiased"
+        className="min-h-screen pt-12 bg-slate-100 antialiased"
         suppressHydrationWarning={true}
       >
         <Providers>
